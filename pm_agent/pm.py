@@ -17,10 +17,10 @@ from typing import TYPE_CHECKING, Optional
 
 from jsonschema import ValidationError, validate as _validate
 
-from conductor.utils import iso_now, load_json_schema, load_prompt
+from pm_agent.utils import iso_now, load_json_schema, load_prompt
 
 if TYPE_CHECKING:
-    from conductor.project_store import ProjectStore
+    from pm_agent.project_store import ProjectStore
 
 
 DECISION_SCHEMA = load_json_schema("decision.schema.json")
@@ -71,7 +71,7 @@ class PMAgent:
             client = Anthropic(api_key=api_key)
         self.client = client
         if guardrails is None:
-            from conductor.guardrails import GuardrailsChecker
+            from pm_agent.guardrails import GuardrailsChecker
             guardrails = GuardrailsChecker(project)
         self.guardrails = guardrails
 
@@ -84,7 +84,7 @@ class PMAgent:
         recent_events: Optional[list[dict]] = None,
     ) -> Decision:
         """单轮决策。"""
-        from conductor.memory import StructuredMemory
+        from pm_agent.memory import StructuredMemory
 
         memory = StructuredMemory.load(self.project.memory_md)
 
@@ -142,7 +142,7 @@ class PMAgent:
 
     def distill_memory(self) -> None:
         """专门的蒸馏轮：把超限的 MEMORY.md 压缩到 ≤ 2500 字。"""
-        from conductor.memory import StructuredMemory
+        from pm_agent.memory import StructuredMemory
 
         memory = StructuredMemory.load(self.project.memory_md)
         # 归档旧版本

@@ -1,4 +1,4 @@
-"""Conductor CLI 入口（基于 typer）。
+"""Octopus Assistant CLI 入口（基于 typer）。
 
 注意：实际命令实现分散在子模块里——driver/escalation/cost/memory 等模块各自
 导出一个被 cli.py 装配的处理函数。本文件只负责命令路由、参数解析和退出码。
@@ -14,7 +14,7 @@ import typer
 from rich.console import Console
 
 app = typer.Typer(
-    name="conductor",
+    name="pm-agent",
     help="Multi-Agent automated development orchestration system.",
     no_args_is_help=True,
 )
@@ -54,7 +54,7 @@ def init_project(
 ):
     """创建新项目。PM 会自主生成 PROJECT.md / GUARDRAILS.md / TASKS.json，
     然后暂停等待 Boss 确认。"""
-    from conductor.project_init import init_project as _init
+    from pm_agent.project_init import init_project as _init
 
     if not requirement and not requirement_file:
         console.print("[red]错误：必须提供 --requirement 或 --requirement-file[/red]")
@@ -74,7 +74,7 @@ def init_project(
 @app.command("start")
 def start_driver(project_id: str = typer.Argument(...)):
     """启动 driver loop，让 PM 自主推进项目。"""
-    from conductor.driver import Driver
+    from pm_agent.driver import Driver
 
     driver = Driver(_project_path(project_id))
     result = driver.run()
@@ -84,7 +84,7 @@ def start_driver(project_id: str = typer.Argument(...)):
 @app.command("pause")
 def pause_project(project_id: str = typer.Argument(...)):
     """暂停项目（设置 paused 状态，driver 下轮检查时退出）。"""
-    from conductor.project_store import ProjectStore
+    from pm_agent.project_store import ProjectStore
 
     ProjectStore(_project_path(project_id)).set_state("paused")
     console.print(f"[yellow]项目 {project_id} 已暂停[/yellow]")
@@ -93,8 +93,8 @@ def pause_project(project_id: str = typer.Argument(...)):
 @app.command("resume")
 def resume_project(project_id: str = typer.Argument(...)):
     """恢复并重新启动 driver。"""
-    from conductor.driver import Driver
-    from conductor.project_store import ProjectStore
+    from pm_agent.driver import Driver
+    from pm_agent.project_store import ProjectStore
 
     ProjectStore(_project_path(project_id)).set_state("running")
     Driver(_project_path(project_id)).run()
@@ -103,8 +103,8 @@ def resume_project(project_id: str = typer.Argument(...)):
 @app.command("stop")
 def stop_project(project_id: str = typer.Argument(...)):
     """停止项目并 kill 所有正在跑的 worker。"""
-    from conductor.process_group import cleanup_stale_workers
-    from conductor.project_store import ProjectStore
+    from pm_agent.process_group import cleanup_stale_workers
+    from pm_agent.project_store import ProjectStore
 
     project_path = _project_path(project_id)
     n = cleanup_stale_workers(project_path)
@@ -117,7 +117,7 @@ def stop_project(project_id: str = typer.Argument(...)):
 @app.command("status")
 def show_status(project_id: str = typer.Argument(...)):
     """打印项目状态快照。"""
-    from conductor.status_view import render_status
+    from pm_agent.status_view import render_status
 
     render_status(_project_path(project_id), console)
 
@@ -130,7 +130,7 @@ def watch_status(
     """实时刷新项目状态。"""
     import time
 
-    from conductor.status_view import render_status
+    from pm_agent.status_view import render_status
 
     try:
         while True:
@@ -144,7 +144,7 @@ def watch_status(
 @app.command("list")
 def list_projects():
     """列出 projects/ 下所有项目及状态。"""
-    from conductor.status_view import list_projects as _list
+    from pm_agent.status_view import list_projects as _list
 
     _list(_projects_root(), console)
 
@@ -155,14 +155,14 @@ def show_logs(
     tail: int = typer.Option(50, "--tail", help="最后 N 行"),
     task: Optional[str] = typer.Option(None, "--task", help="只看某个 task 的日志"),
 ):
-    from conductor.status_view import show_logs as _logs
+    from pm_agent.status_view import show_logs as _logs
 
     _logs(_project_path(project_id), tail=tail, task=task, console=console)
 
 
 @app.command("decisions")
 def show_decisions(project_id: str = typer.Argument(...), tail: int = typer.Option(20)):
-    from conductor.status_view import show_decisions as _show
+    from pm_agent.status_view import show_decisions as _show
 
     _show(_project_path(project_id), tail=tail, console=console)
 
@@ -175,7 +175,7 @@ def reply_to_pm(
     message: str = typer.Argument(...),
 ):
     """回复最新一条待 Boss 处理的 escalation。"""
-    from conductor.escalation import EscalationStore
+    from pm_agent.escalation import EscalationStore
 
     store = EscalationStore(_project_path(project_id))
     n = store.reply_latest(message)
@@ -184,7 +184,7 @@ def reply_to_pm(
 
 @app.command("escalations")
 def list_escalations(project_id: str = typer.Argument(...)):
-    from conductor.escalation import EscalationStore
+    from pm_agent.escalation import EscalationStore
 
     store = EscalationStore(_project_path(project_id))
     for e in store.list_pending():
@@ -204,7 +204,7 @@ def guardrails_show(project_id: str = typer.Argument(...)):
 
 @guardrails_app.command("validate")
 def guardrails_validate(project_id: str = typer.Argument(...)):
-    from conductor.guardrails import GuardrailsChecker
+    from pm_agent.guardrails import GuardrailsChecker
 
     p = _project_path(project_id) / "GUARDRAILS.md"
     errors = GuardrailsChecker.validate_file(p)
@@ -229,7 +229,7 @@ def guardrails_edit(project_id: str = typer.Argument(...)):
 
 @workers_app.command("list")
 def workers_list():
-    from conductor.workers.registry import WorkerRegistry
+    from pm_agent.workers.registry import WorkerRegistry
 
     WorkerRegistry.load_user_workers()
     builtins = ["claude_code", "codex", "gemini"]
@@ -246,7 +246,7 @@ def workers_list():
 @workers_app.command("test")
 def workers_test(name: str = typer.Argument(...)):
     """测试某 Worker 类型是否可用（构造命令、检查 binary 存在）。"""
-    from conductor.workers.registry import WorkerRegistry
+    from pm_agent.workers.registry import WorkerRegistry
 
     WorkerRegistry.load_user_workers()
     try:
@@ -292,7 +292,7 @@ def show_memory(
 
 @app.command("cost")
 def show_cost(project_id: str = typer.Argument(...)):
-    from conductor.cost import CostTracker
+    from pm_agent.cost import CostTracker
 
     tracker = CostTracker(_project_path(project_id))
     tracker.print_summary(console)
@@ -317,7 +317,7 @@ def inspect_task(
     task: str = typer.Option(..., "--task", help="task_id"),
 ):
     """查看某 task 的详细状态、日志、最后反馈。"""
-    from conductor.status_view import inspect_task as _inspect
+    from pm_agent.status_view import inspect_task as _inspect
 
     _inspect(_project_path(project_id), task_id=task, console=console)
 
@@ -346,7 +346,7 @@ def reset_project(
 @app.command("kill")
 def kill_workers(project_id: str = typer.Argument(...)):
     """强制 kill 所有 worker 进程。"""
-    from conductor.process_group import cleanup_stale_workers
+    from pm_agent.process_group import cleanup_stale_workers
 
     n = cleanup_stale_workers(_project_path(project_id))
     console.print(f"[yellow]已 kill {n} 个 worker 进程[/yellow]")

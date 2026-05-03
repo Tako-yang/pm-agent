@@ -9,7 +9,7 @@ import json
 import os
 from pathlib import Path
 
-from conductor.workers.base import WorkerDispatcher
+from pm_agent.workers.base import WorkerDispatcher
 
 
 class ClaudeCodeWorker(WorkerDispatcher):

@@ -13,8 +13,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def scenario_1_todo_app_with_concurrency():
     """场景 1：todo app 含并发（验证 dispatch_parallel 决策路径）"""
-    from conductor.driver import Driver
-    from conductor.pm import Decision
+    from pm_agent.driver import Driver
+    from pm_agent.pm import Decision
 
     # 模拟 PM 输出 dispatch_parallel 决策
     parallel_decision = {
@@ -37,7 +37,7 @@ def scenario_1_todo_app_with_concurrency():
 
 def scenario_2_budget_overrun():
     """场景 2：成本失控保护与自动降级"""
-    from conductor.cost import CostTracker
+    from pm_agent.cost import CostTracker
 
     with tempfile.TemporaryDirectory() as td:
         c = CostTracker(Path(td), budget=20.0)
@@ -53,7 +53,7 @@ def scenario_2_budget_overrun():
 
 def scenario_3_file_conflict_protection():
     """场景 3：并发文件冲突防护"""
-    from conductor.concurrency import FileLockArbiter
+    from pm_agent.concurrency import FileLockArbiter
 
     class MockProject:
         pass
@@ -71,17 +71,17 @@ def scenario_3_file_conflict_protection():
 def scenario_4_custom_worker_type():
     """场景 4：自定义 Worker 类型注册与调度"""
     import yaml
-    from conductor.workers.base import WorkerDispatcher
-    from conductor.workers.registry import WorkerRegistry
+    from pm_agent.workers.base import WorkerDispatcher
+    from pm_agent.workers.registry import WorkerRegistry
 
-    # 模拟用户在 ~/.conductor/plugins/ 下放了一个 .py
+    # 模拟用户在 ~/.pm-agent/plugins/ 下放了一个 .py
     with tempfile.TemporaryDirectory() as td:
         config_dir = Path(td)
         plugins_dir = config_dir / "plugins"
         plugins_dir.mkdir()
 
         (plugins_dir / "aider_worker.py").write_text("""
-from conductor.workers.base import WorkerDispatcher
+from pm_agent.workers.base import WorkerDispatcher
 
 class AiderWorker(WorkerDispatcher):
     cli_name = "aider_test"
@@ -118,7 +118,7 @@ class AiderWorker(WorkerDispatcher):
 
 def scenario_5_knowledge_persistence():
     """场景 5：知识沉淀 —— MEMORY 段注入到 worker prompt"""
-    from conductor.memory import StructuredMemory
+    from pm_agent.memory import StructuredMemory
 
     m = StructuredMemory.parse("""
 # 项目宪法（永远不变）

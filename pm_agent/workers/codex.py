@@ -9,7 +9,7 @@ import os
 import re
 from pathlib import Path
 
-from conductor.workers.base import WorkerDispatcher
+from pm_agent.workers.base import WorkerDispatcher
 
 
 class CodexWorker(WorkerDispatcher):

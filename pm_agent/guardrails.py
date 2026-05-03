@@ -15,7 +15,7 @@ from typing import Optional, TYPE_CHECKING
 import yaml
 
 if TYPE_CHECKING:
-    from conductor.project_store import ProjectStore
+    from pm_agent.project_store import ProjectStore
 
 
 # 抓出形如 ```yaml\n# rules: <category>\n<yaml body>\n``` 的代码块
@@ -189,7 +189,7 @@ class GuardrailsChecker:
 
     @staticmethod
     def validate_file(path: Path) -> list[str]:
-        """供 `conductor guardrails --validate` 调用的静态校验。
+        """供 `pm-agent guardrails --validate` 调用的静态校验。
 
         返回错误消息列表（空列表 = 校验通过）。
         """

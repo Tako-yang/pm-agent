@@ -16,7 +16,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from conductor.pm_session import (
+from pm_agent.pm_session import (
     PMSessionManager,
     PMSessionMaxRetriesError,
     PM_DECISION_TIMEOUT_SEC,
@@ -61,7 +61,7 @@ def test_pm_timeout_triggers_session_restart_with_memory():
     project = _mock_project()
 
     # patch memory.load 别真去读文件
-    with patch("conductor.memory.StructuredMemory.load") as mock_load:
+    with patch("pm_agent.memory.StructuredMemory.load") as mock_load:
         mock_mem = MagicMock()
         mock_mem.to_markdown.return_value = "# Memory Content"
         mock_load.return_value = mock_mem
@@ -109,7 +109,7 @@ def test_pm_max_retries_raises():
     """所有重试都超时 → 抛 PMSessionMaxRetriesError 让 PMAgent 转 escalate。"""
     project = _mock_project()
 
-    with patch("conductor.memory.StructuredMemory.load") as mock_load:
+    with patch("pm_agent.memory.StructuredMemory.load") as mock_load:
         mock_load.return_value = MagicMock(to_markdown=lambda: "")
 
         mgr = PMSessionManager(

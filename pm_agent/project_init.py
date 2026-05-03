@@ -1,11 +1,11 @@
-"""项目初始化：conductor init 命令的实现。
+"""项目初始化：pm-agent init 命令的实现。
 
 流程：
 1. 创建 project 目录结构
 2. 调 PM 一次性生成 PROJECT.md / GUARDRAILS.md / TASKS.json
 3. 校验 GUARDRAILS.md 格式（必含 4 个 yaml 类别）
 4. 创建 escalation 让 Boss 确认
-5. 等待 Boss 通过 conductor reply 回复 → 之后 conductor start 启动 driver
+5. 等待 Boss 通过 pm-agent reply 回复 → 之后 pm-agent start 启动 driver
 """
 from __future__ import annotations
 
@@ -15,12 +15,12 @@ import re
 from pathlib import Path
 from typing import Optional
 
-from conductor.cost import CostTracker
-from conductor.escalation import EscalationStore
-from conductor.guardrails import GuardrailsChecker, GuardrailsParseError
-from conductor.project_store import ProjectStore
-from conductor.utils import iso_now, load_prompt
-from conductor.worktree import WorktreeManager
+from pm_agent.cost import CostTracker
+from pm_agent.escalation import EscalationStore
+from pm_agent.guardrails import GuardrailsChecker, GuardrailsParseError
+from pm_agent.project_store import ProjectStore
+from pm_agent.utils import iso_now, load_prompt
+from pm_agent.worktree import WorktreeManager
 
 
 # PM 输出的 guardrails_md 块内含嵌套 yaml 代码栅，无法用 3 反引号区分外层
@@ -38,14 +38,14 @@ def init_project(
     projects_root: Optional[Path] = None,
     pm_client=None,
 ) -> Path:
-    """完成 conductor init 的所有步骤。返回 project 路径。"""
+    """完成 pm-agent init 的所有步骤。返回 project 路径。"""
     projects_root = projects_root or Path.cwd() / "projects"
     project_path = projects_root / project_id
 
     if project_path.exists() and (project_path / "PROJECT.md").exists():
-        raise RuntimeError(f"项目 {project_id} 已存在。用 conductor reset 重置或换 id。")
+        raise RuntimeError(f"项目 {project_id} 已存在。用 pm-agent reset 重置或换 id。")
 
-    print(f"[Conductor] 创建项目 {project_id} ...")
+    print(f"[pm-agent] 创建项目 {project_id} ...")
     project = ProjectStore(project_path)
 
     # 设置预算
@@ -63,7 +63,7 @@ def init_project(
     })
 
     # 调 PM 生成三件套
-    print("[Conductor] PM 正在生成 PROJECT.md / GUARDRAILS.md / TASKS.json ...")
+    print("[pm-agent] PM 正在生成 PROJECT.md / GUARDRAILS.md / TASKS.json ...")
     project_md, guardrails_md, tasks_json_text = _call_pm_for_init(
         project_id, requirement, client=pm_client,
     )
@@ -88,14 +88,14 @@ def init_project(
         GuardrailsChecker._parse_guardrails(project.guardrails_md)
     except GuardrailsParseError as e:
         # 用 ASCII 字符避免 Windows GBK 控制台编码问题
-        print(f"[Conductor] [!] GUARDRAILS.md 格式问题: {e}")
-        print("  Boss 编辑 GUARDRAILS.md 修复后再 conductor reply approved")
+        print(f"[pm-agent] [!] GUARDRAILS.md 格式问题: {e}")
+        print("  Boss 编辑 GUARDRAILS.md 修复后再 pm-agent reply approved")
 
     # 初始化 git 仓库（init 阶段就要建好，方便后续 worktree）
     WorktreeManager(project_path).ensure_repo()
 
     # 写一份空白 MEMORY.md
-    from conductor.memory import StructuredMemory
+    from pm_agent.memory import StructuredMemory
     StructuredMemory({s: "" for s in StructuredMemory.SECTIONS}).save(project.memory_md)
 
     # 创建初始化 escalation
@@ -107,14 +107,14 @@ def init_project(
             f"- {project.project_md}（项目宪法）\n"
             f"- {project.guardrails_md}（项目护栏）\n"
             f"- {project.tasks_json}（{len(tasks_data.get('tasks', []))} 个任务）\n\n"
-            f"如需修改：编辑文件后运行 conductor reply {project_id} approved\n"
-            f"如要重新生成：conductor reset {project_id} --yes 后重新 init"
+            f"如需修改：编辑文件后运行 pm-agent reply {project_id} approved\n"
+            f"如要重新生成：pm-agent reset {project_id} --yes 后重新 init"
         ),
     )
 
-    print(f"[Conductor] [OK] 项目 {project_id} 已创建")
+    print(f"[pm-agent] [OK] 项目 {project_id} 已创建")
     print(f"  → {project_path}")
-    print(f"  审阅 PROJECT.md / GUARDRAILS.md 后确认: conductor reply {project_id} approved")
+    print(f"  审阅 PROJECT.md / GUARDRAILS.md 后确认: pm-agent reply {project_id} approved")
     return project_path
 
 
@@ -133,7 +133,7 @@ def _call_pm_for_init(project_id: str, requirement: str, client=None) -> tuple[s
     prompt_tmpl = load_prompt("init_pm.md")
     user_msg = prompt_tmpl.replace("{{user_requirement}}", requirement)
 
-    from conductor.pm import DEFAULT_PM_MODEL, PM_MAX_TOKENS
+    from pm_agent.pm import DEFAULT_PM_MODEL, PM_MAX_TOKENS
 
     response = client.messages.create(
         model=DEFAULT_PM_MODEL,

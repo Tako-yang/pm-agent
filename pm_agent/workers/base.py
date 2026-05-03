@@ -8,7 +8,7 @@
    触发 kill_group，实现外部中断。
 3. WorkerResult 增加 pre_dispatch_sha / pid / aborted / duration_sec 字段，
    供 driver 做 worktree 清理 / 错误诊断。
-4. 注入 4 个 env 变量给 orphan scanner 识别（CONDUCTOR_PROJECT_ID 等）。
+4. 注入 4 个 env 变量给 orphan scanner 识别（PM_AGENT_PROJECT_ID 等）。
 5. dispatch 签名改 keyword-only —— 避免 ThreadPoolExecutor.submit 的 kwargs
    与 bound method 的 self 冲突。
 
@@ -29,9 +29,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from conductor.abort_watcher import AbortWatcher
-from conductor.feedback import parse_feedback_block
-from conductor.process_group import ProcessGroupController
+from pm_agent.abort_watcher import AbortWatcher
+from pm_agent.feedback import parse_feedback_block
+from pm_agent.process_group import ProcessGroupController
 
 log = logging.getLogger(__name__)
 
@@ -145,10 +145,10 @@ class WorkerDispatcher(ABC):
         env = self.get_env(use_api_key)
 
         # 注入 orphan scanner 识别标记
-        env["CONDUCTOR_PROJECT_ID"] = project_id
-        env["CONDUCTOR_TASK_ID"] = task_id
-        env["CONDUCTOR_DRIVER_PID"] = str(os.getpid())
-        env["CONDUCTOR_BORN_AT"] = datetime.now(timezone.utc).isoformat()
+        env["PM_AGENT_PROJECT_ID"] = project_id
+        env["PM_AGENT_TASK_ID"] = task_id
+        env["PM_AGENT_DRIVER_PID"] = str(os.getpid())
+        env["PM_AGENT_BORN_AT"] = datetime.now(timezone.utc).isoformat()
 
         # log 路径：<project>/logs/<task_id>.log
         # 用 task_id 而非 worktree.name，避免同 worktree 多次 dispatch 覆盖

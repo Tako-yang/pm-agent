@@ -51,13 +51,13 @@ class WorktreeManager:
         # 设置必要的 user 配置（如果全局未设置）
         self._ensure_git_identity()
         subprocess.run(
-            ["git", "commit", "-m", "conductor: initial commit"],
+            ["git", "commit", "-m", "pm-agent: initial commit"],
             cwd=self.project_root, check=True, capture_output=True,
         )
 
     def _ensure_git_identity(self) -> None:
         """确保仓库内有 user.name / user.email。"""
-        for key, default in [("user.name", "conductor"), ("user.email", "conductor@local")]:
+        for key, default in [("user.name", "pm-agent"), ("user.email", "pm-agent@local")]:
             r = subprocess.run(
                 ["git", "config", "--get", key],
                 cwd=self.project_root, capture_output=True, text=True,

@@ -73,7 +73,7 @@ if sys.platform == "win32":
         @staticmethod
         def popen_kwargs() -> dict:
             """Popen 必传的 creationflags：
-            - CREATE_BREAKAWAY_FROM_JOB：防止 conductor 自身已经在某个 Job 里
+            - CREATE_BREAKAWAY_FROM_JOB：防止 pm-agent 自身已经在某个 Job 里
               （IDE / Docker / Service Manager）时，子进程被继承到那个 Job 上
               而无法加入我们自己的 Job。
             - CREATE_SUSPENDED：进程创建后立即暂停，等 attach 完成再 resume，

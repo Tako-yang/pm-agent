@@ -10,8 +10,8 @@ import json
 from pathlib import Path
 from typing import Any, Optional
 
-from conductor.tasks import Task, TaskStore
-from conductor.utils import append_jsonl, iso_now, read_jsonl
+from pm_agent.tasks import Task, TaskStore
+from pm_agent.utils import append_jsonl, iso_now, read_jsonl
 
 
 class ProjectStore:
@@ -140,7 +140,7 @@ class ProjectStore:
 
     def needs_human(self) -> bool:
         """检查是否有未回复的 escalation。"""
-        from conductor.escalation import EscalationStore
+        from pm_agent.escalation import EscalationStore
 
         return len(EscalationStore(self.path).list_pending()) > 0
 

@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 def test_escalation_lifecycle():
-    from conductor.escalation import EscalationStore
+    from pm_agent.escalation import EscalationStore
 
     with tempfile.TemporaryDirectory() as td:
         proj = Path(td)
@@ -50,8 +50,8 @@ def test_escalation_lifecycle():
 
 
 def test_corrections_double_confirm():
-    from conductor.corrections import MemoryCorrectionStore
-    from conductor.project_store import ProjectStore
+    from pm_agent.corrections import MemoryCorrectionStore
+    from pm_agent.project_store import ProjectStore
 
     with tempfile.TemporaryDirectory() as td:
         project = ProjectStore(Path(td) / "demo")
@@ -85,7 +85,7 @@ def test_corrections_double_confirm():
 
 
 def test_cost_tracker():
-    from conductor.cost import CostTracker
+    from pm_agent.cost import CostTracker
 
     with tempfile.TemporaryDirectory() as td:
         c = CostTracker(Path(td), budget=10.0)
@@ -113,7 +113,7 @@ def test_cost_tracker():
 
 
 def test_task_store_runnable_filter():
-    from conductor.tasks import Task, TaskStore
+    from pm_agent.tasks import Task, TaskStore
 
     with tempfile.TemporaryDirectory() as td:
         path = Path(td) / "TASKS.json"
@@ -131,7 +131,7 @@ def test_task_store_runnable_filter():
 
 
 def test_memory_distillation_threshold():
-    from conductor.memory import StructuredMemory
+    from pm_agent.memory import StructuredMemory
 
     m = StructuredMemory({s: "" for s in StructuredMemory.SECTIONS})
     assert not m.needs_distillation()
@@ -143,8 +143,8 @@ def test_memory_distillation_threshold():
 
 
 def test_pm_decision_signature():
-    from conductor.driver import Driver
-    from conductor.pm import Decision
+    from pm_agent.driver import Driver
+    from pm_agent.pm import Decision
 
     # 同 task 不同 cli → 视为相似（原地打转）
     a = Decision.from_dict({"action": "dispatch", "task_id": "task_001", "cli": "codex"})
@@ -161,8 +161,8 @@ def test_pm_decision_signature():
 
 
 def test_full_init_with_mock_pm():
-    """模拟一次 conductor init：用 mock client 让 PM 返回固定的三件套。"""
-    from conductor.project_init import init_project
+    """模拟一次 pm-agent init：用 mock client 让 PM 返回固定的三件套。"""
+    from pm_agent.project_init import init_project
 
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -248,12 +248,12 @@ must_escalate:
         assert (project_path / ".git").exists()
 
         # GUARDRAILS.md 应该可解析
-        from conductor.guardrails import GuardrailsChecker
+        from pm_agent.guardrails import GuardrailsChecker
         errors = GuardrailsChecker.validate_file(project_path / "GUARDRAILS.md")
         assert errors == [], f"GUARDRAILS.md 应可解析: {errors}"
 
         # 应该创建了一条 escalation
-        from conductor.escalation import EscalationStore
+        from pm_agent.escalation import EscalationStore
         pending = EscalationStore(project_path).list_pending()
         assert len(pending) == 1
         assert "确认" in pending[0]["title"]

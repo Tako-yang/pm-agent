@@ -29,11 +29,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Optional, TYPE_CHECKING
 
-from conductor.workers.base import WorkerResult
+from pm_agent.workers.base import WorkerResult
 
 if TYPE_CHECKING:
-    from conductor.cost import CostTracker
-    from conductor.project_store import ProjectStore
+    from pm_agent.cost import CostTracker
+    from pm_agent.project_store import ProjectStore
 
 log = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class WorkerPool:
         self.cost_tracker = cost_tracker
         self.executor = ThreadPoolExecutor(
             max_workers=max(max_concurrent * 2, 4),
-            thread_name_prefix="conductor-worker",
+            thread_name_prefix="pm-agent-worker",
         )
         self.active: dict[str, ActiveWorker] = {}
         self._lock = threading.Lock()

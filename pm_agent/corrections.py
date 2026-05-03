@@ -17,10 +17,10 @@ import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from conductor.utils import iso_now
+from pm_agent.utils import iso_now
 
 if TYPE_CHECKING:
-    from conductor.project_store import ProjectStore
+    from pm_agent.project_store import ProjectStore
 
 
 class MemoryCorrectionStore:
@@ -120,7 +120,7 @@ class MemoryCorrectionStore:
         confirmed = self.take_confirmed()
         if not confirmed:
             return 0
-        from conductor.memory import StructuredMemory
+        from pm_agent.memory import StructuredMemory
 
         memory = StructuredMemory.load(self.project.memory_md)
         n = 0

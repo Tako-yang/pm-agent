@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from conductor.project_store import ProjectStore
+    from pm_agent.project_store import ProjectStore
 
 log = logging.getLogger(__name__)
 
@@ -119,7 +119,7 @@ class PMSessionManager:
     def _build_recovery_prompt(self) -> str:
         """构造重启时的恢复 prompt。"""
         try:
-            from conductor.memory import StructuredMemory
+            from pm_agent.memory import StructuredMemory
             mem = StructuredMemory.load(self.project.memory_md)
             memory_text = mem.to_markdown()
         except Exception as e:

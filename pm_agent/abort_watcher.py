@@ -25,7 +25,7 @@ import threading
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from conductor.process_group import ProcessGroupController
+    from pm_agent.process_group import ProcessGroupController
 
 log = logging.getLogger(__name__)
 

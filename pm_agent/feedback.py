@@ -13,7 +13,7 @@ from typing import Optional
 
 from jsonschema import ValidationError, validate as _validate
 
-from conductor.utils import load_json_schema
+from pm_agent.utils import load_json_schema
 
 FEEDBACK_SCHEMA = load_json_schema("feedback.schema.json")
 

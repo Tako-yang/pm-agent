@@ -25,12 +25,12 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from conductor.concurrency import (
+from pm_agent.concurrency import (
     DuplicateTaskError,
     PoolFullError,
     WorkerPool,
 )
-from conductor.workers.base import WorkerResult
+from pm_agent.workers.base import WorkerResult
 
 
 # ---------- helper：fake worker_fn ----------
@@ -116,8 +116,8 @@ def test_pool_full_raises():
 
 def test_abort_event_kills_real_subprocess():
     """启动真的 sleep subprocess，abort 它，验证进程 1 秒内被 kill。"""
-    from conductor.process_group import ProcessGroupController
-    from conductor.abort_watcher import AbortWatcher
+    from pm_agent.process_group import ProcessGroupController
+    from pm_agent.abort_watcher import AbortWatcher
 
     pool = WorkerPool(max_concurrent=1)
 

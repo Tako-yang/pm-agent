@@ -3,11 +3,11 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "conductor"
+name = "pm-agent"
 version = "0.1.0"
-description = "Multi-Agent automated development orchestration system (Conductor)"
+description = "Octopus Assistant (章鱼助手) — a PM agent that, like an octopus, dispatches tasks across multiple coding CLIs (Claude Code / Codex / Gemini) in parallel."
 requires-python = ">=3.11"
-authors = [{ name = "Boss" }]
+authors = [{ name = "Tako-yang" }]
 license = { text = "MIT" }
 readme = "README.md"
 
@@ -29,14 +29,14 @@ dev = [
 ]
 
 [project.scripts]
-conductor = "conductor.cli:app"
+pm-agent = "pm_agent.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["conductor*"]
+include = ["pm_agent*"]
 
 [tool.setuptools.package-data]
-conductor = ["prompts/*.md", "schemas/*.json"]
+pm_agent = ["prompts/*.md", "schemas/*.json"]
 
 [tool.ruff]
 line-length = 100

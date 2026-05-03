@@ -18,19 +18,19 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
-from conductor.concurrency import FileLockArbiter, WorkerPool, WorkerProgressMonitor
-from conductor.cost import CostTracker
-from conductor.escalation import EscalationStore
-from conductor.guardrails import GuardrailsChecker
-from conductor.memory import StructuredMemory
-from conductor.pm import Decision, PMAgent, PMError
-from conductor.process_group import cleanup_stale_workers
-from conductor.project_store import ProjectStore
-from conductor.utils import iso_now
-from conductor.worktree import WorktreeManager
+from pm_agent.concurrency import FileLockArbiter, WorkerPool, WorkerProgressMonitor
+from pm_agent.cost import CostTracker
+from pm_agent.escalation import EscalationStore
+from pm_agent.guardrails import GuardrailsChecker
+from pm_agent.memory import StructuredMemory
+from pm_agent.pm import Decision, PMAgent, PMError
+from pm_agent.process_group import cleanup_stale_workers
+from pm_agent.project_store import ProjectStore
+from pm_agent.utils import iso_now
+from pm_agent.worktree import WorktreeManager
 
 if TYPE_CHECKING:
-    from conductor.workers.base import WorkerResult
+    from pm_agent.workers.base import WorkerResult
 
 
 class Driver:
@@ -278,7 +278,7 @@ class Driver:
         self.project.tasks.save()
 
         worktree = self.worktree_mgr.ensure_worktree(task_id)
-        from conductor.workers.registry import WorkerRegistry
+        from pm_agent.workers.registry import WorkerRegistry
         dispatcher = WorkerRegistry.get(cli)
         try:
             self.worker_pool.submit(
@@ -347,7 +347,7 @@ class Driver:
             self.project.tasks.save()
 
             worktree = self.worktree_mgr.ensure_worktree(tid)
-            from conductor.workers.registry import WorkerRegistry
+            from pm_agent.workers.registry import WorkerRegistry
             dispatcher = WorkerRegistry.get(cli)
             try:
                 self.worker_pool.submit(
@@ -403,7 +403,7 @@ class Driver:
 
         注意：已 done 的任务不会被覆盖（TaskStore.replace_all 内部保护）。
         """
-        from conductor.tasks import Task
+        from pm_agent.tasks import Task
 
         new_tasks_data = (d.get("tasks_update") or {}).get("tasks", [])
         if not new_tasks_data:
@@ -479,7 +479,7 @@ class Driver:
         memory = StructuredMemory.load(self.project.memory_md)
         applied = memory.apply_updates(updates)
         memory.save(self.project.memory_md)
-        from conductor.utils import append_jsonl
+        from pm_agent.utils import append_jsonl
         append_jsonl(self.project.memory_log, {
             "at": iso_now(),
             "applied": applied,
@@ -489,7 +489,7 @@ class Driver:
     def _queue_memory_corrections(self, source_task_id: str, corrections: list[dict]) -> None:
         if not corrections:
             return
-        from conductor.corrections import MemoryCorrectionStore
+        from pm_agent.corrections import MemoryCorrectionStore
         store = MemoryCorrectionStore(self.project)
         for c in corrections:
             store.add(c, source_task_id=source_task_id)
@@ -551,5 +551,5 @@ class Driver:
 
     def _notify(self, msg: str) -> None:
         """终端打印 + 日志。"""
-        print(f"[Conductor] {msg}", flush=True)
+        print(f"[pm-agent] {msg}", flush=True)
         self.project.append_decision_log({"event": "notify", "message": msg})

@@ -1,6 +1,6 @@
 # 自定义 Worker 开发指南
 
-> Conductor 内置 3 种 Worker：`claude_code` / `codex` / `gemini`。
+> pm-agent 内置 3 种 Worker：`claude_code` / `codex` / `gemini`。
 > 想用其它 CLI（Aider / OpenCode / 本地模型 / 你自己的脚本）？50 行代码搞定。
 
 ## 1. 基本概念
@@ -23,14 +23,14 @@
 
 ## 2. 完整示例：Aider Worker
 
-`~/.conductor/plugins/aider_worker.py`：
+`~/.pm-agent/plugins/aider_worker.py`：
 
 ```python
 import os
 import re
 from pathlib import Path
 
-from conductor.workers.base import WorkerDispatcher
+from pm_agent.workers.base import WorkerDispatcher
 
 
 class AiderWorker(WorkerDispatcher):
@@ -62,9 +62,9 @@ class AiderWorker(WorkerDispatcher):
         return float(match.group(1)) if match else 0.0
 ```
 
-## 3. 注册到 Conductor
+## 3. 注册到 pm-agent
 
-`~/.conductor/workers.yaml`：
+`~/.pm-agent/workers.yaml`：
 
 ```yaml
 workers:
@@ -76,7 +76,7 @@ workers:
 ## 4. 验证
 
 ```bash
-$ conductor workers list
+$ pm-agent workers list
 内置 Worker:
   claude_code
   codex
@@ -84,7 +84,7 @@ $ conductor workers list
 自定义 Worker:
   aider
 
-$ conductor workers test aider
+$ pm-agent workers test aider
 [OK] aider 二进制可调用 (/usr/local/bin/aider)
 [OK] 注册类继承 WorkerDispatcher
 [OK] build_command 返回: ['aider', '--yes-always', ...]
@@ -110,13 +110,13 @@ PM 在每轮决策时通过 `WorkerRegistry.list_all()` 看到所有可用类型
 
 `WorkerRegistry.load_user_workers()` 在以下时机被调用：
 
-- `conductor workers list/test` 命令
+- `pm-agent workers list/test` 命令
 - `Driver.__init__` 启动时（一次性）
 
 它会：
-1. 读 `~/.conductor/workers.yaml`
+1. 读 `~/.pm-agent/workers.yaml`
 2. 对每个 `workers.<name>` 条目：
-   - 优先从 `~/.conductor/plugins/<module>.py` 直接加载（不走 sys.path）
+   - 优先从 `~/.pm-agent/plugins/<module>.py` 直接加载（不走 sys.path）
    - 找不到则尝试 `import <module>`（适合用户已 pip install 自己的包）
 3. 注册类到 `WorkerRegistry._registry`
 
@@ -177,7 +177,7 @@ def build_command(self, worktree: Path) -> list[str]:
 观察 worker 实际跑的内容：
 
 ```bash
-$ conductor logs <project_id> --task task_007
+$ pm-agent logs <project_id> --task task_007
 ```
 
 或看失败归档：

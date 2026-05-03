@@ -14,14 +14,14 @@ def iso_now() -> str:
 
 
 def load_json_schema(name: str) -> dict:
-    """从 conductor.schemas 包内加载 JSON Schema。"""
-    with resources.files("conductor.schemas").joinpath(name).open("r", encoding="utf-8") as f:
+    """从 pm_agent.schemas 包内加载 JSON Schema。"""
+    with resources.files("pm_agent.schemas").joinpath(name).open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
 def load_prompt(name: str) -> str:
-    """从 conductor.prompts 包内加载 prompt 模板。"""
-    return resources.files("conductor.prompts").joinpath(name).read_text(encoding="utf-8")
+    """从 pm_agent.prompts 包内加载 prompt 模板。"""
+    return resources.files("pm_agent.prompts").joinpath(name).read_text(encoding="utf-8")
 
 
 def append_jsonl(path: Path, record: dict[str, Any]) -> None:

@@ -14,7 +14,7 @@
     ```
 
     ## RESPONSE
-    <Boss 编辑此段或用 conductor reply 命令填入>
+    <Boss 编辑此段或用 pm-agent reply 命令填入>
 """
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ import re
 from pathlib import Path
 from typing import Optional
 
-from conductor.utils import iso_now
+from pm_agent.utils import iso_now
 
 
 _FILENAME_RE = re.compile(r"^(\d{3,})_([a-z0-9_\-]+)\.md$", re.IGNORECASE)
@@ -146,7 +146,7 @@ class EscalationStore:
             ])
         parts.extend([
             "## RESPONSE",
-            "_Boss 在此填写回复，或运行: conductor reply <project_id> \"...\"_",
+            "_Boss 在此填写回复，或运行: pm-agent reply <project_id> \"...\"_",
             "",
         ])
         return "\n".join(parts)
@@ -191,7 +191,7 @@ class EscalationStore:
     @staticmethod
     def _notify_terminal(path: Path, title: str) -> None:
         """终端打印 + 跨平台通知（best effort）。"""
-        msg = f"\n[Conductor 升级] {title}\n  → {path}\n  请用: conductor reply <project_id> \"...\"\n"
+        msg = f"\n[章鱼助手 升级] {title}\n  → {path}\n  请用: pm-agent reply <project_id> \"...\"\n"
         print(msg, flush=True)
         # 系统通知（best effort，不抛错）
         try:
@@ -200,7 +200,7 @@ class EscalationStore:
                 import subprocess
                 subprocess.run(
                     ["osascript", "-e",
-                     f'display notification "{title}" with title "Conductor"'],
+                     f'display notification "{title}" with title "Octopus"'],
                     capture_output=True, timeout=2,
                 )
             elif sys.platform == "win32":
@@ -211,7 +211,7 @@ class EscalationStore:
                 if shutil.which("notify-send"):
                     import subprocess
                     subprocess.run(
-                        ["notify-send", "Conductor", title],
+                        ["notify-send", "Octopus", title],
                         capture_output=True, timeout=2,
                     )
         except Exception:

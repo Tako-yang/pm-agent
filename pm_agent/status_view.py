@@ -1,9 +1,9 @@
 """CLI 状态可视化（rich）。
 
 实现：
-- conductor status <project_id>
-- conductor list
-- conductor logs / decisions / inspect
+- pm-agent status <project_id>
+- pm-agent list
+- pm-agent logs / decisions / inspect
 """
 from __future__ import annotations
 
@@ -16,11 +16,11 @@ from rich.panel import Panel
 from rich.progress import BarColumn, Progress, TextColumn
 from rich.table import Table
 
-from conductor.cost import CostTracker
-from conductor.escalation import EscalationStore
-from conductor.memory import StructuredMemory
-from conductor.project_store import ProjectStore
-from conductor.utils import read_jsonl, read_tail
+from pm_agent.cost import CostTracker
+from pm_agent.escalation import EscalationStore
+from pm_agent.memory import StructuredMemory
+from pm_agent.project_store import ProjectStore
+from pm_agent.utils import read_jsonl, read_tail
 
 
 def render_status(project_path: Path, console: Console) -> None:

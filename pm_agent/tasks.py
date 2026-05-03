@@ -15,7 +15,7 @@ from typing import Optional
 
 from jsonschema import validate as _jsonschema_validate
 
-from conductor.utils import iso_now, load_json_schema
+from pm_agent.utils import iso_now, load_json_schema
 
 VALID_STATUSES = {"pending", "running", "done", "failed", "blocked"}
 TASKS_SCHEMA = load_json_schema("tasks.schema.json")

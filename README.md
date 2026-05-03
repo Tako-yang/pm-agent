@@ -1,6 +1,6 @@
-# Conductor
+# 🐙 Octopus Assistant · 章鱼助手
 
-> **English** | [中文](#中文)
+> Project: **pm-agent** · **English** | [中文](#章鱼助手)
 
 A local-first multi-agent development orchestrator. Give it a one-sentence requirement; it autonomously plans, dispatches, and coordinates multiple coding CLIs (Claude Code / Codex / Gemini) to take your project from zero to delivery — while you sip coffee.
 
@@ -13,9 +13,23 @@ A local-first multi-agent development orchestrator. Give it a one-sentence requi
 
 ---
 
-## What is Conductor?
+## Why "Octopus"?
 
-Most AI coding tools (Claude Code, Codex, Gemini CLI) are **single-shot assistants** — you ask, they answer, repeat. Conductor flips this:
+An octopus has **eight arms that move independently but coordinate through a central brain**. Each arm can taste, grip, and act on its own, while the brain decides which arms to deploy where.
+
+That's exactly the architecture here:
+
+- **The brain** = a PM Agent (Claude Opus, long-session) — plans, decomposes, decides
+- **The arms** = N coding-CLI workers (Claude Code, Codex, Gemini, your custom CLI) — each runs a task in its own isolated `git worktree`, in parallel
+- **The nervous system** = the Driver loop — dispatches work, prevents conflicts, recovers from failures
+
+You feed in one sentence. The PM-octopus splits it into tasks, sends each tentacle off with its piece, watches them work simultaneously, pulls in the results, decides what's next. You only step in when it hits a real boundary — a guardrail, a budget cap, an architectural fork.
+
+---
+
+## What is pm-agent?
+
+Most AI coding tools (Claude Code, Codex, Gemini CLI) are **single-shot assistants** — you ask, they answer, repeat. pm-agent flips this:
 
 - **PM Agent** (driven by a long-session CLI) breaks down requirements, plans tasks, and dispatches workers
 - **Worker Agents** (Claude Code / Codex / Gemini / your custom CLI) execute coding tasks in parallel, isolated `git worktree`s
@@ -27,13 +41,13 @@ You go from *"AI helps me write code"* to *"I manage an AI development team."*
 ```
 You: "Build a Next.js todo app with Google OAuth and PostgreSQL."
   ↓
-PM Agent (Claude Opus, long session)
-  ├─ Drafts PRD + GUARDRAILS.md     → asks you once for sign-off
+PM Agent (Claude Opus, long session)  ← the brain
+  ├─ Drafts PROJECT.md + GUARDRAILS.md     → asks you once for sign-off
   ├─ Decomposes into 23 tasks
-  └─ Dispatches workers in parallel:
-        Worker 1 (Claude Code) → frontend
-        Worker 2 (Codex)       → backend API
-        Worker 3 (Gemini)      → CI/CD
+  └─ Sends out tentacles in parallel:
+        Tentacle 1 (Claude Code) → frontend
+        Tentacle 2 (Codex)       → backend API
+        Tentacle 3 (Gemini)      → CI/CD
   ↓
 ~2 hours later, fully tested project delivered.
 You spent ~30 minutes total intervening.
@@ -43,7 +57,7 @@ You spent ~30 minutes total intervening.
 
 ## Key Features
 
-- 🤖 **Multi-CLI orchestration** — Mix Claude Code, Codex, Gemini, or any CLI you write a 50-line plugin for
+- 🐙 **Multi-tentacle orchestration** — Mix Claude Code, Codex, Gemini, or any CLI you write a 50-line plugin for
 - 🚀 **True parallelism** — Up to N workers run simultaneously with file-lock arbitration preventing conflicts
 - 🧠 **Structured long-term memory** — 5-section `MEMORY.md` auto-distills, no context explosion across long projects
 - 🛡️ **Project Guardrails** — `GUARDRAILS.md` defines what PM may NOT decide alone (frameworks, scope, security)
@@ -51,13 +65,13 @@ You spent ~30 minutes total intervening.
 - 🔒 **Worker isolation** — Each task runs in its own `git worktree`, failures auto-cleanup with snapshot archival
 - 🪟 **Cross-platform** — Linux, macOS, WSL2 first-class; native Windows supported (with caveats)
 - 🔁 **Self-healing** — Stuck-loop detection, auto-retry with worker-type switching, orphan process cleanup
-- 📋 **CLI-only by design** — No web UI, no daemon mode, no surprise — `conductor watch <project>` is all you need
+- 📋 **CLI-only by design** — No web UI, no daemon mode, no surprise — `pm-agent watch <project>` is all you need
 
 ---
 
 ## How It Differs
 
-| | Cursor / Copilot | Claude Code (solo) | **Conductor** |
+| | Cursor / Copilot | Claude Code (solo) | **pm-agent** |
 |---|---|---|---|
 | Granularity | Line/block completion | Single task per session | Whole-project autopilot |
 | Your role | Driver | Co-pilot | Reviewer of escalations |
@@ -86,18 +100,18 @@ You spent ~30 minutes total intervening.
 
 ```bash
 # Install from source (no PyPI release yet)
-git clone https://github.com/Tako-yang/pm-agent.git conductor
-cd conductor
+git clone https://github.com/Tako-yang/pm-agent.git
+cd pm-agent
 pip install -e .
 
 # Verify
-conductor --version
-conductor workers list   # Should show: claude_code, codex, gemini
+pm-agent --version
+pm-agent workers list   # Should show: claude_code, codex, gemini
 ```
 
 ### Authentication
 
-Conductor expects each CLI to be already authenticated:
+pm-agent expects each CLI to be already authenticated:
 
 ```bash
 # Claude Code: log in once (uses your Pro/Max subscription)
@@ -116,7 +130,7 @@ The PM Agent uses Claude Code in long-session mode by default, riding your Max s
 
 ```bash
 # 1. Create a new project
-conductor init my-todo-app \
+pm-agent init my-todo-app \
     --requirement "A Next.js todo app with Google OAuth and PostgreSQL" \
     --budget 30 \
     --max-concurrent 3
@@ -126,10 +140,10 @@ $ cat projects/my-todo-app/PROJECT.md       # Review the plan
 $ cat projects/my-todo-app/GUARDRAILS.md    # Review the boundaries
 
 # 3. Approve (optionally with adjustments)
-conductor reply my-todo-app "approved, but use Drizzle not Prisma"
+pm-agent reply my-todo-app "approved, but use Drizzle not Prisma"
 
 # 4. Watch it work
-conductor watch my-todo-app
+pm-agent watch my-todo-app
 ```
 
 That's it. PM will dispatch workers, handle failures, distill memory, and eventually deliver. You'll get notified when it needs you.
@@ -154,14 +168,15 @@ That's it. PM will dispatch workers, handle failures, distill memory, and eventu
 ┌──────▼──────────┐
 │    PM Agent     │  Claude Opus, long CLI session.
 │  (Claude Opus)  │  Decomposes tasks, picks workers, writes
-└──────┬──────────┘  worker prompts. Outputs JSON decisions.
+│  ← the brain    │  worker prompts. Outputs JSON decisions.
+└──────┬──────────┘
        │
 ┌──────▼─────────────────────────┐
 │    Worker Pool (N=3 default)   │
 │    ┌─────┐  ┌─────┐  ┌─────┐  │
-│    │ CC  │  │Codex│  │Gem. │  │  Each in its own git worktree.
-│    └─────┘  └─────┘  └─────┘  │  One-shot subprocess.
-└────────────────────────────────┘
+│    │ CC  │  │Codex│  │Gem. │  │  ← the tentacles
+│    └─────┘  └─────┘  └─────┘  │  Each in its own git worktree.
+└────────────────────────────────┘  One-shot subprocess.
 ```
 
 ### The 5-Section Memory
@@ -223,7 +238,7 @@ PM has high autonomy *within* these boundaries. Driver enforces them as a second
 
 ### Cross-platform process management
 
-Worker subprocesses can spawn npm/pnpm/dev servers; killing the parent isn't enough. Conductor uses **kernel-level primitives**:
+Worker subprocesses can spawn npm/pnpm/dev servers; killing the parent isn't enough. pm-agent uses **kernel-level primitives**:
 
 | Platform | Primary | Fallback |
 |---|---|---|
@@ -263,7 +278,7 @@ PM gets failure context in next decision; can switch worker type or escalate.
 
 ### Driver crash recovery
 
-Workers tag themselves with environment variables (`CONDUCTOR_PROJECT_ID`, `CONDUCTOR_DRIVER_PID`, `CONDUCTOR_BORN_AT`). On restart, driver scans for orphans whose owning driver is dead and kills them. State is fully on disk; resume is `conductor resume <project>`.
+Workers tag themselves with environment variables (`PM_AGENT_PROJECT_ID`, `PM_AGENT_DRIVER_PID`, `PM_AGENT_BORN_AT`). On restart, driver scans for orphans whose owning driver is dead and kills them. State is fully on disk; resume is `pm-agent resume <project>`.
 
 ---
 
@@ -271,38 +286,38 @@ Workers tag themselves with environment variables (`CONDUCTOR_PROJECT_ID`, `COND
 
 ```bash
 # Project lifecycle
-conductor init <id> --requirement "..." [--budget 50] [--max-concurrent 3]
-conductor start <id>
-conductor pause <id>
-conductor resume <id>
-conductor stop <id>          # Kills workers + cleanup
+pm-agent init <id> --requirement "..." [--budget 50] [--max-concurrent 3]
+pm-agent start <id>
+pm-agent pause <id>
+pm-agent resume <id>
+pm-agent stop <id>          # Kills workers + cleanup
 
 # Status
-conductor status <id>        # One-shot snapshot
-conductor watch <id>         # Live updating dashboard
-conductor list               # All projects
-conductor logs <id> [--task task_007] [--tail 50]
-conductor decisions <id>     # PM decision history
+pm-agent status <id>        # One-shot snapshot
+pm-agent watch <id>         # Live updating dashboard
+pm-agent list               # All projects
+pm-agent logs <id> [--task task_007] [--tail 50]
+pm-agent decisions <id>     # PM decision history
 
 # Boss interaction
-conductor reply <id> "your response"
-conductor escalations <id>   # Pending escalations
+pm-agent reply <id> "your response"
+pm-agent escalations <id>   # Pending escalations
 
 # Guardrails
-conductor guardrails <id>            # View
-conductor guardrails <id> --edit     # $EDITOR
-conductor guardrails <id> --validate # Syntax check
+pm-agent guardrails <id>            # View
+pm-agent guardrails <id> --edit     # $EDITOR
+pm-agent guardrails <id> --validate # Syntax check
 
 # Worker management
-conductor workers list
-conductor workers test <name>
-conductor workers register <name>    # Wizard for adding custom workers
+pm-agent workers list
+pm-agent workers test <name>
+pm-agent workers register <name>    # Wizard for adding custom workers
 
 # Debugging
-conductor inspect <id> --task task_007
-conductor memory <id> [--history]
-conductor cost <id>
-conductor pool <id>          # Live worker pool state
+pm-agent inspect <id> --task task_007
+pm-agent memory <id> [--history]
+pm-agent cost <id>
+pm-agent pool <id>          # Live worker pool state
 ```
 
 ---
@@ -312,8 +327,8 @@ conductor pool <id>          # Live worker pool state
 Plug in any CLI in ~50 lines. Example for Aider:
 
 ```python
-# ~/.conductor/plugins/aider_worker.py
-from conductor.workers.base import WorkerDispatcher
+# ~/.pm-agent/plugins/aider_worker.py
+from pm_agent.workers.base import WorkerDispatcher
 
 class AiderWorker(WorkerDispatcher):
     cli_name = "aider"
@@ -332,7 +347,7 @@ class AiderWorker(WorkerDispatcher):
         return parse_aider_cost(stderr)
 ```
 
-Register in `~/.conductor/workers.yaml`:
+Register in `~/.pm-agent/workers.yaml`:
 
 ```yaml
 workers:
@@ -341,7 +356,7 @@ workers:
     class: AiderWorker
 ```
 
-Verify: `conductor workers test aider`
+Verify: `pm-agent workers test aider`
 
 See [`docs/CUSTOM_WORKERS.md`](docs/CUSTOM_WORKERS.md) for the full guide.
 
@@ -365,7 +380,7 @@ See [`docs/CUSTOM_WORKERS.md`](docs/CUSTOM_WORKERS.md) for the full guide.
 - **v1.3**: Computer Use integration (PM browses docs)
 - **v2.0**: TUI dashboard upgrade (still no web)
 
-Web UI / Dashboard: **permanently out of scope**. Conductor is CLI-first by design choice.
+Web UI / Dashboard: **permanently out of scope**. pm-agent is CLI-first by design choice.
 
 ---
 
@@ -391,7 +406,7 @@ git clone https://github.com/Tako-yang/pm-agent.git
 cd pm-agent
 pip install -e ".[dev]"
 pytest                          # Run 22 tests
-ruff check . && mypy conductor  # Lint
+ruff check . && mypy pm_agent   # Lint
 ```
 
 ---
@@ -402,20 +417,11 @@ ruff check . && mypy conductor  # Lint
 
 ---
 
-## Acknowledgments
+<a name="章鱼助手"></a>
 
-Inspired by:
-- Anthropic's internal C-compiler experiment (16 agents + Docker + git worktree + file locks)
-- The Ralph Loop pattern (external loop, in-context state)
-- MetaGPT, Maestro, OMX — for proving multi-CLI orchestration is possible (and showing where the rough edges are)
+# 🐙 章鱼助手 · Octopus Assistant
 
----
-
-<a name="中文"></a>
-
-# Conductor (中文)
-
-> [English](#conductor) | **中文**
+> 项目代号：**pm-agent** · [English](#-octopus-assistant--章鱼助手) | **中文**
 
 本地优先的多 Agent 自动开发编排系统。给它一句话需求，它自主拆分、派发、协调多个编码 CLI（Claude Code / Codex / Gemini）将你的项目从 0 到 1 交付——你只需要喝杯咖啡。
 
@@ -428,9 +434,23 @@ Inspired by:
 
 ---
 
-## Conductor 是什么？
+## 为什么叫"章鱼"？
 
-主流 AI 编码工具（Claude Code、Codex、Gemini CLI）都是**单次问答助手**——你问它答，反复循环。Conductor 反过来：
+章鱼有 **8 条独立运动但通过中央大脑协调** 的触手。每条触手能独立感知、抓取、行动；大脑负责决定哪条触手去哪里干什么。
+
+这正是本项目的架构：
+
+- **大脑** = PM Agent（Claude Opus 长 session）—— 规划、拆分、决策
+- **触手** = N 个编码 CLI Worker（Claude Code、Codex、Gemini，或你的自定义 CLI）—— 各自在隔离的 `git worktree` 内并发跑任务
+- **神经系统** = Driver 主循环 —— 派发工作、防止冲突、错误恢复
+
+你给一句话。章鱼 PM 拆成多个任务，每条触手带一份去干，并发运行，把结果收回来，决定下一步。你只在它撞到真实边界时介入——护栏、预算、架构岔路。
+
+---
+
+## pm-agent 是什么？
+
+主流 AI 编码工具（Claude Code、Codex、Gemini CLI）都是**单次问答助手**——你问它答，反复循环。pm-agent 反过来：
 
 - **PM Agent**（基于 CLI 长 session 驱动）拆分需求、规划任务、派发 Worker
 - **Worker Agents**（Claude Code / Codex / Gemini / 你的自定义 CLI）在隔离 `git worktree` 内并发执行编码任务
@@ -442,13 +462,13 @@ Inspired by:
 ```
 你："做一个用 Next.js + Google OAuth + PostgreSQL 的 todo 应用"
   ↓
-PM Agent (Claude Opus 长 session)
-  ├─ 起草 PRD + GUARDRAILS.md     → 找你一次性确认
+PM Agent（Claude Opus 长 session）  ← 大脑
+  ├─ 起草 PROJECT.md + GUARDRAILS.md   → 找你一次性确认
   ├─ 拆分为 23 个任务
-  └─ 并发派发 worker：
-        Worker 1 (Claude Code) → 前端
-        Worker 2 (Codex)       → 后端 API
-        Worker 3 (Gemini)      → CI/CD
+  └─ 触手并发出动：
+        触手 1（Claude Code）→ 前端
+        触手 2（Codex）      → 后端 API
+        触手 3（Gemini）     → CI/CD
   ↓
 ~2 小时后，完整测试通过的项目交付。
 你总共投入约 30 分钟。
@@ -458,7 +478,7 @@ PM Agent (Claude Opus 长 session)
 
 ## 核心特性
 
-- 🤖 **多 CLI 编排** — 混搭 Claude Code、Codex、Gemini，或写 50 行插件接入任意 CLI
+- 🐙 **多触手编排** — 混搭 Claude Code、Codex、Gemini，或写 50 行插件接入任意 CLI
 - 🚀 **真并发** — 最多 N 个 worker 同时跑，文件锁仲裁防冲突
 - 🧠 **结构化长期记忆** — 5 段 `MEMORY.md` 自动蒸馏，长项目不爆 context
 - 🛡️ **项目护栏** — `GUARDRAILS.md` 定义 PM 不可独自决策的事项（框架、范围、安全）
@@ -466,13 +486,13 @@ PM Agent (Claude Opus 长 session)
 - 🔒 **Worker 隔离** — 每个任务独立 `git worktree`，失败自动清理 + 快照归档
 - 🪟 **跨平台** — Linux / macOS / WSL2 一等支持；原生 Windows 二等支持
 - 🔁 **自愈** — 卡死检测、自动切换 worker 类型重试、孤儿进程扫描清理
-- 📋 **CLI-only 设计** — 不做 Web UI、不做 daemon、不搞花样，`conductor watch <项目>` 就够了
+- 📋 **CLI-only 设计** — 不做 Web UI、不做 daemon、不搞花样，`pm-agent watch <项目>` 就够了
 
 ---
 
 ## 为什么不是别的工具？
 
-| | Cursor / Copilot | Claude Code（单用）| **Conductor** |
+| | Cursor / Copilot | Claude Code（单用）| **pm-agent** |
 |---|---|---|---|
 | 粒度 | 行/块补全 | 单 session 单任务 | 整项目自动 |
 | 你的角色 | 驾驶员 | 副驾 | 升级时的审核者 |
@@ -501,18 +521,18 @@ PM Agent (Claude Opus 长 session)
 
 ```bash
 # 暂无 PyPI 发布，从源码装
-git clone https://github.com/Tako-yang/pm-agent.git conductor
-cd conductor
+git clone https://github.com/Tako-yang/pm-agent.git
+cd pm-agent
 pip install -e .
 
 # 验证
-conductor --version
-conductor workers list   # 应该列出: claude_code, codex, gemini
+pm-agent --version
+pm-agent workers list   # 应该列出: claude_code, codex, gemini
 ```
 
 ### 认证
 
-Conductor 假设各 CLI 已经登录：
+pm-agent 假设各 CLI 已经登录：
 
 ```bash
 # Claude Code：登一次（吃你的 Pro/Max 订阅）
@@ -531,7 +551,7 @@ PM Agent 默认用 Claude Code 长 session 模式，走你的 Max 订阅——**
 
 ```bash
 # 1. 创建新项目
-conductor init my-todo-app \
+pm-agent init my-todo-app \
     --requirement "用 Next.js + Google OAuth + PostgreSQL 做 todo 应用" \
     --budget 30 \
     --max-concurrent 3
@@ -541,10 +561,10 @@ $ cat projects/my-todo-app/PROJECT.md       # 看看规划
 $ cat projects/my-todo-app/GUARDRAILS.md    # 看看边界
 
 # 3. 批准（可附加调整）
-conductor reply my-todo-app "approved，但用 Drizzle 不要 Prisma"
+pm-agent reply my-todo-app "approved，但用 Drizzle 不要 Prisma"
 
 # 4. 实时观察
-conductor watch my-todo-app
+pm-agent watch my-todo-app
 ```
 
 到此为止。PM 会派 worker、处理失败、蒸馏记忆，最终交付。它需要你时会通知你。
@@ -569,14 +589,15 @@ conductor watch my-todo-app
 ┌──────▼──────────┐
 │    PM Agent     │  Claude Opus，长 CLI session。
 │  (Claude Opus)  │  拆分任务、选 worker、写 worker prompt。
-└──────┬──────────┘  输出 JSON 决策。
+│   ← 大脑        │  输出 JSON 决策。
+└──────┬──────────┘
        │
 ┌──────▼─────────────────────────┐
 │   Worker Pool（默认 N=3）      │
 │    ┌─────┐  ┌─────┐  ┌─────┐  │
-│    │ CC  │  │Codex│  │Gem. │  │  各自在独立 git worktree。
-│    └─────┘  └─────┘  └─────┘  │  一次性 subprocess。
-└────────────────────────────────┘
+│    │ CC  │  │Codex│  │Gem. │  │  ← 触手
+│    └─────┘  └─────┘  └─────┘  │  各自在独立 git worktree。
+└────────────────────────────────┘  一次性 subprocess。
 ```
 
 ### 5 段记忆
@@ -638,7 +659,7 @@ PM 在边界**内**有高度自主权。Driver 作为第二层兜底执行。
 
 ### 跨平台进程管理
 
-Worker subprocess 会派生 npm/pnpm/dev server 等，杀父进程不够。Conductor 用**内核级原语**：
+Worker subprocess 会派生 npm/pnpm/dev server 等，杀父进程不够。pm-agent 用**内核级原语**：
 
 | 平台 | 主力 | 双保险 |
 |---|---|---|
@@ -678,7 +699,7 @@ PM 在下一轮决策时拿到失败上下文，可切 worker 类型或 escalate
 
 ### Driver 崩溃恢复
 
-Worker 启动时打 env 标记（`CONDUCTOR_PROJECT_ID`、`CONDUCTOR_DRIVER_PID`、`CONDUCTOR_BORN_AT`）。重启时 driver 扫所属 driver 已死的孤儿 worker，kill 之。状态全部落盘，恢复就是 `conductor resume <项目>`。
+Worker 启动时打 env 标记（`PM_AGENT_PROJECT_ID`、`PM_AGENT_DRIVER_PID`、`PM_AGENT_BORN_AT`）。重启时 driver 扫所属 driver 已死的孤儿 worker，kill 之。状态全部落盘，恢复就是 `pm-agent resume <项目>`。
 
 ---
 
@@ -686,38 +707,38 @@ Worker 启动时打 env 标记（`CONDUCTOR_PROJECT_ID`、`CONDUCTOR_DRIVER_PID`
 
 ```bash
 # 项目生命周期
-conductor init <id> --requirement "..." [--budget 50] [--max-concurrent 3]
-conductor start <id>
-conductor pause <id>
-conductor resume <id>
-conductor stop <id>          # kill 所有 worker + 清理
+pm-agent init <id> --requirement "..." [--budget 50] [--max-concurrent 3]
+pm-agent start <id>
+pm-agent pause <id>
+pm-agent resume <id>
+pm-agent stop <id>          # kill 所有 worker + 清理
 
 # 状态查询
-conductor status <id>        # 一次性快照
-conductor watch <id>         # 实时刷新仪表盘
-conductor list               # 所有项目
-conductor logs <id> [--task task_007] [--tail 50]
-conductor decisions <id>     # PM 决策历史
+pm-agent status <id>        # 一次性快照
+pm-agent watch <id>         # 实时刷新仪表盘
+pm-agent list               # 所有项目
+pm-agent logs <id> [--task task_007] [--tail 50]
+pm-agent decisions <id>     # PM 决策历史
 
 # Boss 交互
-conductor reply <id> "回复内容"
-conductor escalations <id>   # 待回复 escalation
+pm-agent reply <id> "回复内容"
+pm-agent escalations <id>   # 待回复 escalation
 
 # 护栏管理
-conductor guardrails <id>            # 查看
-conductor guardrails <id> --edit     # $EDITOR 编辑
-conductor guardrails <id> --validate # 语法校验
+pm-agent guardrails <id>            # 查看
+pm-agent guardrails <id> --edit     # $EDITOR 编辑
+pm-agent guardrails <id> --validate # 语法校验
 
 # Worker 管理
-conductor workers list
-conductor workers test <name>
-conductor workers register <name>    # 引导添加自定义 worker
+pm-agent workers list
+pm-agent workers test <name>
+pm-agent workers register <name>    # 引导添加自定义 worker
 
 # 调试
-conductor inspect <id> --task task_007
-conductor memory <id> [--history]
-conductor cost <id>
-conductor pool <id>          # 实时 worker pool 状态
+pm-agent inspect <id> --task task_007
+pm-agent memory <id> [--history]
+pm-agent cost <id>
+pm-agent pool <id>          # 实时 worker pool 状态
 ```
 
 ---
@@ -727,8 +748,8 @@ conductor pool <id>          # 实时 worker pool 状态
 约 50 行代码就能接入任何 CLI。Aider 例子：
 
 ```python
-# ~/.conductor/plugins/aider_worker.py
-from conductor.workers.base import WorkerDispatcher
+# ~/.pm-agent/plugins/aider_worker.py
+from pm_agent.workers.base import WorkerDispatcher
 
 class AiderWorker(WorkerDispatcher):
     cli_name = "aider"
@@ -747,7 +768,7 @@ class AiderWorker(WorkerDispatcher):
         return parse_aider_cost(stderr)
 ```
 
-注册到 `~/.conductor/workers.yaml`：
+注册到 `~/.pm-agent/workers.yaml`：
 
 ```yaml
 workers:
@@ -756,7 +777,7 @@ workers:
     class: AiderWorker
 ```
 
-验证：`conductor workers test aider`
+验证：`pm-agent workers test aider`
 
 完整指南见 [`docs/CUSTOM_WORKERS.md`](docs/CUSTOM_WORKERS.md)。
 
@@ -780,7 +801,7 @@ workers:
 - **v1.3**：Computer Use 集成（PM 浏览文档）
 - **v2.0**：TUI 仪表盘升级（仍然不做 Web）
 
-Web UI / Dashboard：**永久排除**。Conductor 是 CLI-first 的设计选择。
+Web UI / Dashboard：**永久排除**。pm-agent 是 CLI-first 的设计选择。
 
 ---
 
@@ -806,7 +827,7 @@ git clone https://github.com/Tako-yang/pm-agent.git
 cd pm-agent
 pip install -e ".[dev]"
 pytest                          # 跑测试（22 个）
-ruff check . && mypy conductor  # lint
+ruff check . && mypy pm_agent   # lint
 ```
 
 ---
@@ -814,12 +835,3 @@ ruff check . && mypy conductor  # lint
 ## 许可
 
 [MIT](LICENSE) — 自由使用、修改、分发。
-
----
-
-## 致谢
-
-灵感来自：
-- Anthropic 内部 C 编译器实验（16 agent + Docker + git worktree + 文件锁）
-- Ralph Loop 模式（外部循环 + 上下文内状态）
-- MetaGPT、Maestro、OMX — 证明多 CLI 编排可行（并暴露了哪些粗糙边缘）

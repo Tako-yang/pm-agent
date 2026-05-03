@@ -2,10 +2,10 @@
 
 管理：
 - 内置 Worker（claude_code / codex / gemini）：模块导入时自动注册
-- 用户自定义 Worker：从 ~/.conductor/workers.yaml 加载
+- 用户自定义 Worker：从 ~/.pm-agent/workers.yaml 加载
 
 加载 user workers 的时机：
-- CLI 命令 `conductor workers list/test` 显式调用
+- CLI 命令 `pm-agent workers list/test` 显式调用
 - driver 启动时（一次性）
 """
 from __future__ import annotations
@@ -19,7 +19,7 @@ from typing import Optional
 
 import yaml
 
-from conductor.workers.base import WorkerDispatcher
+from pm_agent.workers.base import WorkerDispatcher
 
 
 class WorkerRegistry:
@@ -47,19 +47,19 @@ class WorkerRegistry:
 
     @classmethod
     def load_user_workers(cls, config_path: Optional[Path] = None) -> int:
-        """从 ~/.conductor/workers.yaml 加载用户自定义 Worker。
+        """从 ~/.pm-agent/workers.yaml 加载用户自定义 Worker。
 
-        config_path 可显式指定（测试用）；默认从 $HOME/.conductor/workers.yaml。
+        config_path 可显式指定（测试用）；默认从 $HOME/.pm-agent/workers.yaml。
         允许从两种位置 import 用户类：
         - 已安装的 Python 包（spec.module 是模块路径）
-        - ~/.conductor/plugins/ 目录下的散文件（按 module 名匹配 .py）
+        - ~/.pm-agent/plugins/ 目录下的散文件（按 module 名匹配 .py）
 
         返回加载的 worker 数量。
         """
         if cls._user_loaded and config_path is None:
             return 0  # 同一进程只加载一次（避免重复 import 副作用）
 
-        config_path = config_path or Path.home() / ".conductor" / "workers.yaml"
+        config_path = config_path or Path.home() / ".pm-agent" / "workers.yaml"
         if not config_path.exists():
             cls._user_loaded = True
             return 0
@@ -116,9 +116,9 @@ class WorkerRegistry:
 # ---------- 内置 Worker 自动注册 ----------
 
 # 在最底部 import 避免循环依赖
-from conductor.workers.claude_code import ClaudeCodeWorker  # noqa: E402
-from conductor.workers.codex import CodexWorker  # noqa: E402
-from conductor.workers.gemini import GeminiWorker  # noqa: E402
+from pm_agent.workers.claude_code import ClaudeCodeWorker  # noqa: E402
+from pm_agent.workers.codex import CodexWorker  # noqa: E402
+from pm_agent.workers.gemini import GeminiWorker  # noqa: E402
 
 WorkerRegistry.register(ClaudeCodeWorker)
 WorkerRegistry.register(CodexWorker)

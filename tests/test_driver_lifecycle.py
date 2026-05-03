@@ -19,8 +19,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from conductor.concurrency import WorkerPool
-from conductor.workers.base import WorkerResult
+from pm_agent.concurrency import WorkerPool
+from pm_agent.workers.base import WorkerResult
 
 
 # ---------- 测试 9：shutdown 不 hang（BUG 1）----------
@@ -33,8 +33,8 @@ sys.path.insert(0, {repr(str(Path(__file__).parent.parent))})
 
 import time
 from pathlib import Path
-from conductor.concurrency import WorkerPool
-from conductor.workers.base import WorkerResult
+from pm_agent.concurrency import WorkerPool
+from pm_agent.workers.base import WorkerResult
 
 def long_worker(**kw):
     abort = kw['abort_event']
@@ -72,7 +72,7 @@ print(f'SHUTDOWN_DURATION={{duration:.2f}}')
 
 def test_dispatch_failure_does_not_hang():
     """模拟 file_lock 冲突 → 主循环不应在 wait_any 上卡死。"""
-    from conductor.concurrency import FileLockArbiter
+    from pm_agent.concurrency import FileLockArbiter
 
     project = MagicMock()
     project.path = Path("/tmp")
@@ -141,7 +141,7 @@ def test_kill_all_releases_file_lock():
 
 def test_process_group_kills_grandchildren():
     """ProcessGroupController kill_group 必须杀掉 worker 派生的子孙进程。"""
-    from conductor.process_group import ProcessGroupController
+    from pm_agent.process_group import ProcessGroupController
 
     if sys.platform == "win32":
         # Windows: cmd 启动一个 ping，ping 是 cmd 的子进程
