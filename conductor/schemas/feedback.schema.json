@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "type": "object",
+  "required": ["task_id", "status", "summary"],
+  "properties": {
+    "task_id": {"type": "string"},
+    "status": {"enum": ["completed", "failed", "blocked"]},
+    "files_changed": {"type": "array", "items": {"type": "string"}},
+    "tests_passing": {"type": ["boolean", "null"]},
+    "key_decisions": {"type": "array", "items": {"type": "string"}},
+    "lessons_learned": {"type": "array", "items": {"type": "string"}},
+    "memory_updates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["section", "action", "content"],
+        "properties": {
+          "section": {"type": "string"},
+          "action": {"enum": ["add", "update", "remove"]},
+          "content": {"type": "string"}
+        }
+      }
+    },
+    "memory_corrections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "section": {"type": "string"},
+          "action": {"enum": ["add", "update", "remove"]},
+          "content": {"type": "string"},
+          "reason": {"type": "string"}
+        }
+      }
+    },
+    "blockers": {"type": "array", "items": {"type": "string"}},
+    "summary": {"type": "string"},
+    "self_assessment": {
+      "type": "object",
+      "properties": {
+        "acceptance_met": {"type": "boolean"},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}

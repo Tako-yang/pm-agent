@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Tests / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Conductor 运行时数据 —— 用户实际项目数据，绝不入库
+projects/
+*.bak
+*.log
+
+# Conductor 运行时配置（用户级，含可能的 API key 引用）
+~/.conductor/
+
+# 临时文件
+tmp/
+temp/
+*.tmp

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "type": "object",
+  "required": ["action"],
+  "properties": {
+    "action": {
+      "enum": [
+        "dispatch", "dispatch_parallel", "verify",
+        "replan", "complete", "escalate", "distill_memory"
+      ]
+    },
+    "reasoning": {"type": "string"},
+    "task_id": {"type": "string"},
+    "cli": {"type": "string"},
+    "prompt": {"type": "string"},
+    "memory_sections_to_inject": {"type": "array", "items": {"type": "string"}},
+    "acceptance_check": {"type": "string"},
+    "estimated_cost_usd": {"type": "number", "minimum": 0},
+    "files_owned": {"type": "array", "items": {"type": "string"}},
+    "guardrails_check": {
+      "type": "object",
+      "properties": {
+        "violates": {"type": "boolean"},
+        "checked_clauses": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "batch": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["task_id", "cli", "prompt", "files_owned"],
+        "properties": {
+          "task_id": {"type": "string"},
+          "cli": {"type": "string"},
+          "prompt": {"type": "string"},
+          "memory_sections_to_inject": {"type": "array", "items": {"type": "string"}},
+          "files_owned": {"type": "array", "items": {"type": "string"}},
+          "acceptance_check": {"type": "string"},
+          "estimated_cost_usd": {"type": "number", "minimum": 0}
+        }
+      }
+    },
+    "tasks_update": {
+      "description": "replan 时附带的 TASKS.json 全量更新",
+      "type": "object"
+    },
+    "escalation_reason": {"type": "string"},
+    "escalation_title": {"type": "string"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"action": {"const": "dispatch"}}},
+      "then": {"required": ["task_id", "cli", "prompt", "files_owned"]}
+    },
+    {
+      "if": {"properties": {"action": {"const": "dispatch_parallel"}}},
+      "then": {"required": ["batch"]}
+    },
+    {
+      "if": {"properties": {"action": {"const": "escalate"}}},
+      "then": {"required": ["escalation_reason"]}
+    }
+  ]
+}
