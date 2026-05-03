@@ -1,6 +1,8 @@
-# 🐙 Octopus Assistant · 章鱼助手
+# pm-agent
 
-> Project: **pm-agent** · **English** | [中文](#章鱼助手)
+> 🐙 **Octopus Assistant · 章鱼助手** — friendly nickname for the design metaphor below
+>
+> **English** | [中文](#pm-agent-中文)
 
 A local-first multi-agent development orchestrator. Give it a one-sentence requirement; it autonomously plans, dispatches, and coordinates multiple coding CLIs (Claude Code / Codex / Gemini) to take your project from zero to delivery — while you sip coffee.
 
@@ -13,7 +15,9 @@ A local-first multi-agent development orchestrator. Give it a one-sentence requi
 
 ---
 
-## Why "Octopus"?
+## The Octopus Metaphor
+
+pm-agent's nickname is *Octopus Assistant* (章鱼助手). Here's why.
 
 An octopus has **eight arms that move independently but coordinate through a central brain**. Each arm can taste, grip, and act on its own, while the brain decides which arms to deploy where.
 
@@ -417,11 +421,13 @@ ruff check . && mypy pm_agent   # Lint
 
 ---
 
-<a name="章鱼助手"></a>
+<a name="pm-agent-中文"></a>
 
-# 🐙 章鱼助手 · Octopus Assistant
+# pm-agent
 
-> 项目代号：**pm-agent** · [English](#-octopus-assistant--章鱼助手) | **中文**
+> 🐙 **章鱼助手 · Octopus Assistant** — 设计隐喻的友好昵称（见下文）
+>
+> [English](#pm-agent) | **中文**
 
 本地优先的多 Agent 自动开发编排系统。给它一句话需求，它自主拆分、派发、协调多个编码 CLI（Claude Code / Codex / Gemini）将你的项目从 0 到 1 交付——你只需要喝杯咖啡。
 
@@ -434,7 +440,9 @@ ruff check . && mypy pm_agent   # Lint
 
 ---
 
-## 为什么叫"章鱼"？
+## "章鱼" —— 设计隐喻
+
+pm-agent 的昵称是 *章鱼助手*（Octopus Assistant），原因如下。
 
 章鱼有 **8 条独立运动但通过中央大脑协调** 的触手。每条触手能独立感知、抓取、行动；大脑负责决定哪条触手去哪里干什么。
 

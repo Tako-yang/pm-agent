@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pm-agent"
 version = "0.1.0"
-description = "Octopus Assistant (章鱼助手) — a PM agent that, like an octopus, dispatches tasks across multiple coding CLIs (Claude Code / Codex / Gemini) in parallel."
+description = "pm-agent — a multi-agent dev orchestrator that, like an octopus, dispatches tasks across multiple coding CLIs (Claude Code / Codex / Gemini) in parallel. Nickname: Octopus Assistant / 章鱼助手."
 requires-python = ">=3.11"
 authors = [{ name = "Tako-yang" }]
 license = { text = "MIT" }
